@@ -5,32 +5,170 @@ permalink: /publications/
 author_profile: true
 ---
 
-{% if site.author.googlescholar %}
-  <div class="wordwrap">You can also find my articles on <a href="{{site.author.googlescholar}}">my Google Scholar profile</a>.</div>
-{% endif %}
+<style>
+  .pub-list.icon-mode .pub-row { display: none; }
+  .pub-list.icon-mode .pub-card { display: block; }
+  .pub-list.detail-mode .pub-card { display: none; }
+  .pub-list.detail-mode .pub-row { display: flex; gap: 1em; padding: .4em 0; border-bottom: 1px solid #eee; }
 
-{% include base_path %}
+  .pub-card {
+    display: grid; grid-template-rows: 160px auto; gap: .5em;
+    border: 1px solid #ddd; border-radius: 8px; padding: 1em;
+  }
+  .pub-list.icon-mode { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5em; }
 
-<!-- New style rendering if publication categories are defined -->
-{% if site.publication_category %}
-  {% for category in site.publication_category  %}
-    {% assign title_shown = false %}
-    {% for post in site.publications reversed %}
-      {% if post.category != category[0] %}
-        {% continue %}
-      {% endif %}
-      {% unless title_shown %}
-        <h2>{{ category[1].title }}</h2><hr />
-        {% assign title_shown = true %}
-      {% endunless %}
-      {% include archive-single.html %}
-    {% endfor %}
+  .pub-controls {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    padding: .75rem 1rem;
+    border: 1px solid #e2e2e2;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* segmented icon/detail toggle */
+  .seg-toggle {
+    display: inline-flex;
+    background: #f0f0f0;
+    border-radius: 8px;
+    padding: 2px;
+  }
+  .seg-toggle button {
+    border: none;
+    background: transparent;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+  }
+  .seg-toggle button svg { width: 16px; height: 16px; fill: #666; }
+  .seg-toggle button.active { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  .seg-toggle button.active svg { fill: #111; }
+
+  /* selected-only switch */
+  .switch { display: flex; align-items: center; gap: .5rem; cursor: pointer; font-size: .9rem; }
+  .switch input { display: none; }
+  .switch-track {
+    width: 34px; height: 18px; border-radius: 999px; background: #ccc;
+    position: relative; transition: background .15s;
+  }
+  .switch-thumb {
+    width: 14px; height: 14px; border-radius: 50%; background: #fff;
+    position: absolute; top: 2px; left: 2px; transition: left .15s;
+  }
+  .switch input:checked + .switch-track { background: #2f6fed; }
+  .switch input:checked + .switch-track .switch-thumb { left: 18px; }
+
+  /* year range */
+  .year-range { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: #555; }
+  .year-range { position: relative; width: 160px; height: 24px; }
+  .year-range input[type=range] {
+    position: absolute; width: 100%; top: 8px; pointer-events: none;
+    -webkit-appearance: none; background: transparent;
+  }
+  .year-range input[type=range]::-webkit-slider-thumb {
+    pointer-events: auto; -webkit-appearance: none;
+    width: 14px; height: 14px; border-radius: 50%; background: #2f6fed; cursor: pointer;
+  }
+  #year-min-label, #year-max-label { position: absolute; top: -14px; font-size: .75rem; }
+  #year-min-label { left: 0; } #year-max-label { right: 0; }
+
+  .pub-controls select {
+    border: 1px solid #ddd; border-radius: 6px; padding: 5px 8px; font-size: .85rem;
+  }
+
+  .pub-group-header {
+    grid-column: 1 / -1;        /* spans full width in icon-mode grid */
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #888;
+    padding: 1.25rem 0 .4rem;
+    border-bottom: 1px solid #eee;
+    margin-bottom: .5rem;
+  }
+  .pub-group-header:first-child { padding-top: 0; }
+</style>
+
+<div class="pub-controls">
+  <!-- icon/list segmented toggle -->
+  <div class="seg-toggle" id="view-toggle">
+    <button data-view="icon" class="active" aria-label="Icon view">
+      <svg viewBox="0 0 20 20"><rect x="2" y="2" width="7" height="7" rx="1"/><rect x="11" y="2" width="7" height="7" rx="1"/><rect x="2" y="11" width="7" height="7" rx="1"/><rect x="11" y="11" width="7" height="7" rx="1"/></svg>
+    </button>
+    <button data-view="detail" aria-label="Detail view">
+      <svg viewBox="0 0 20 20"><rect x="2" y="3" width="16" height="2"/><rect x="2" y="9" width="16" height="2"/><rect x="2" y="15" width="16" height="2"/></svg>
+    </button>
+  </div>
+
+  <!-- selected-only switch -->
+  <label class="switch">
+    <input type="checkbox" id="selected-only">
+    <span class="switch-track"><span class="switch-thumb"></span></span>
+    <span class="switch-label">Selected only</span>
+  </label>
+
+  <!-- year range slider -->
+  <div class="year-range">
+    <span id="year-min-label"></span>
+    <input type="range" id="year-min" step="1">
+    <input type="range" id="year-max" step="1">
+    <span id="year-max-label"></span>
+  </div>
+
+  <select id="filter-venue"><option value="all">All venues</option></select>
+  <select id="filter-tag"><option value="all">All tags</option></select>
+
+  <select id="group-by">
+    <option value="none">No groups</option>
+    <option value="year">By year</option>
+    <option value="venue">By venue</option>
+    <option value="tags">By tag</option>
+    <option value="type">By type</option>
+  </select>
+</div>
+
+<div id="pub-list" class="pub-list icon-mode">
+  {% assign pubs = site.publications | sort: 'date' | reverse %}
+  {% for pub in pubs %}
+    <div class="pub-item"
+         data-year="{{ pub.date | date: '%Y' }}"
+         data-venue="{{ pub.venue }}"
+         data-tags="{{ pub.tags | join: ',' }}"
+         data-type="{{ pub.type }}"
+         data-selected="{{ pub.selected }}">
+
+      <!-- ICON CARD -->
+      <div class="pub-card">
+        {% if pub.image %}<img src="{{ pub.image | relative_url }}" alt="">{% endif %}
+        <h3><a href="{{ pub.permalink }}">{{ pub.title }}</a></h3>
+        <p class="pub-meta">{{ pub.venue }}, {{ pub.date | date: '%Y' }}</p>
+        <div class="pub-links">
+          {% if pub.links.paper %}<a href="{{ pub.links.paper }}">Paper</a>{% endif %}
+          {% if pub.links.code %}<a href="{{ pub.links.code }}">Code</a>{% endif %}
+          {% if pub.links.dataset %}<a href="{{ pub.links.dataset }}">Dataset</a>{% endif %}
+          {% if pub.links.slides %}<a href="{{ pub.links.slides }}">Slides</a>{% endif %}
+          {% if pub.links.poster %}<a href="{{ pub.links.poster }}">Poster</a>{% endif %}
+          {% if pub.links.video %}<a href="{{ pub.links.video }}">Video</a>{% endif %}
+          {% if pub.links.project %}<a href="{{ pub.links.project }}">Project</a>{% endif %}
+        </div>
+      </div>
+
+      <!-- DETAIL ROW -->
+      <div class="pub-row">
+        <span class="pub-title"><a href="{{ pub.permalink }}">{{ pub.title }}</a></span>
+        <span class="pub-authors">{{ pub.authors }}</span>
+        <span class="pub-venue-year">{{ pub.venue }}, {{ pub.date | date: '%Y' }}</span>
+        <span class="pub-icons">
+          {% if pub.links.paper %}<a href="{{ pub.links.paper }}" title="Paper">📄</a>{% endif %}
+          {% if pub.links.code %}<a href="{{ pub.links.code }}" title="Code">💻</a>{% endif %}
+        </span>
+      </div>
+    </div>
   {% endfor %}
-{% else %}
-  {% for post in site.publications reversed %}
-    {% include archive-single.html %}
-  {% endfor %}
-{% endif %}
+</div>
 
-
-
+<script src="{{ '/assets/js/publications-filter.js' | relative_url }}"></script>

@@ -1,0 +1,20 @@
+milestone:
+  icon: "fa-solid fa-flag"
+  label: "MILESTONE"
+  color: "#b23a5c"
+paper:
+  icon: "fa-solid fa-file-lines"
+  label: "PAPER"
+  color: "#4a4fd6"
+award:
+  icon: "fa-solid fa-award"
+  label: "AWARD"
+  color: "#d9622b"
+talk:
+  icon: "fa-solid fa-microphone"
+  label: "TALK"
+  color: "#2e8b57"
+press:
+  icon: "fa-solid fa-newspaper"
+  label: "PRESS"
+  color: "#6c757d"

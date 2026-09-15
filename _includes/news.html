@@ -1,0 +1,95 @@
+<style>
+.news-feed { max-width: 780px; }
+.news-row {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+}
+.news-hidden { display: none; }
+.news-date {
+  flex: 0 0 90px;
+  font-weight: 600;
+  color: #111;
+}
+.news-content { flex: 1; }
+.news-text { line-height: 1.5; }
+.news-text a { color: #6c63ff; text-decoration: underline; }
+.news-tags { margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.news-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 0.15em 0.7em;
+  background: #fff;
+}
+.news-tag-icon { font-size: 0.85em; }
+.news-toggle {
+  text-align: center;
+  padding-top: 1rem;
+  color: #999;
+}
+.news-toggle a { color: #6c63ff; text-decoration: none; font-size: 0.9rem; }
+.news-toggle-sep { margin: 0 0.5em; }
+</style>
+
+<div class="news-feed">
+  {% assign items = site.data.news | sort: "date" | reverse %}
+  {% for item in items %}
+    <div class="news-row{% if forloop.index > 5 %} news-hidden{% endif %}">
+      <div class="news-date">{{ item.date | date: "%b %Y" }}</div>
+      <div class="news-content">
+        <div class="news-text">{{ item.text | markdownify | remove: '<p>' | remove: '</p>' }}</div>
+            {% if item.tags %}
+            <div class="news-tags">
+                {% for tag in item.tags %}
+                {% assign meta = site.data.news_tags[tag] %}
+                {% if meta %}
+                    <span class="news-tag" style="color: {{ meta.color }}; border-color: {{ meta.color }};">
+                    <i class="{{ meta.icon }}"></i>{{ meta.label }}
+                    </span>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+
+  {% if items.size > 5 %}
+    <div class="news-toggle">
+      <a href="#" class="news-show-more">Show More</a>
+      <span class="news-toggle-sep">/</span>
+      <a href="#" class="news-show-less" style="display:none;">Show Less</a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var more = document.querySelector('.news-show-more');
+  var less = document.querySelector('.news-show-less');
+  var hidden = document.querySelectorAll('.news-hidden');
+  if (more) {
+    more.addEventListener('click', function (e) {
+      e.preventDefault();
+      hidden.forEach(function (el) { el.style.display = 'flex'; });
+      more.style.display = 'none';
+      less.style.display = 'inline';
+    });
+  }
+  if (less) {
+    less.addEventListener('click', function (e) {
+      e.preventDefault();
+      hidden.forEach(function (el) { el.style.display = 'none'; });
+      less.style.display = 'none';
+      more.style.display = 'inline';
+    });
+  }
+});
+</script>
