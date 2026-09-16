@@ -1,13 +1,15 @@
 - date: 2026-09-04
-  text: 'Our paper "Flexible Language-Guided Representation Editing for Adaptive Robot Behavior" has been accepted to [CoRL 2026](https://www.corl.org/)!'
+  text: 'Our paper based on my M.Eng. thesis, "Flexible Language-Guided Representation Editing for Adaptive Robot Behavior," has been accepted to [CoRL 2026](https://www.corl.org/)!'
   tags: [paper]
 
+- date: 2026-08-24
+  text: "Began my Ph.D. in Robotics at CMU, where I'll be working with [Professor Henny Admoni](https://hennyadmoni.com/) in the [HARP Lab](https://harplab.github.io/)!"
+  tags: [milestone]
+
 - date: 2026-05-27
-  text: "Received my M.Eng. degree in Electrical Engineering and Computer Science from MIT!"
+  text: 'Received my M.Eng. degree in Electrical Engineering and Computer Science with a concentration in Artificial Intelligence from MIT!'
   tags: [milestone]
 
 - date: 2025-05-30
-  text: "Received my B.S. degree in Electrical Engineering and Computer Science from MIT!"
+  text: 'Received my B.S. degree in Electrical Engineering and Computer Science with minors in Mechanical Engineering and Writing from MIT!'
   tags: [milestone]
-
-# See _data/news_tags.yml for the list of available tags, icons, and colors

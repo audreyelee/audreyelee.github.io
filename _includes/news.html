@@ -6,11 +6,10 @@
   padding: 1rem 0;
   border-bottom: 1px solid #eee;
 }
-.news-hidden { display: none; }
 .news-date {
   flex: 0 0 90px;
   font-weight: 600;
-  color: #111;
+  color: inherit;
 }
 .news-content { flex: 1; }
 .news-text { line-height: 1.5; }
@@ -19,14 +18,15 @@
 .news-tag {
   display: inline-flex;
   align-items: center;
-  gap: 0.3em;
-  font-size: 0.7rem;
-  font-weight: 700;
+  gap: 0.5em;
+  font-size: 0.5rem;
+  font-weight: 600;
   letter-spacing: 0.02em;
-  border: 1px solid;
   border-radius: 999px;
-  padding: 0.15em 0.7em;
-  background: #fff;
+  padding: 0.1em 0.6em;
+  color: var(--tag-color);
+  background: color-mix(in srgb, var(--tag-color) 15%, white);
+  border: none;
 }
 .news-tag-icon { font-size: 0.85em; }
 .news-toggle {
@@ -41,7 +41,7 @@
 <div class="news-feed">
   {% assign items = site.data.news | sort: "date" | reverse %}
   {% for item in items %}
-    <div class="news-row{% if forloop.index > 5 %} news-hidden{% endif %}">
+    <div class="news-row">
       <div class="news-date">{{ item.date | date: "%b %Y" }}</div>
       <div class="news-content">
         <div class="news-text">{{ item.text | markdownify | remove: '<p>' | remove: '</p>' }}</div>
@@ -50,9 +50,9 @@
                 {% for tag in item.tags %}
                 {% assign meta = site.data.news_tags[tag] %}
                 {% if meta %}
-                    <span class="news-tag" style="color: {{ meta.color }}; border-color: {{ meta.color }};">
-                    <i class="{{ meta.icon }}"></i>{{ meta.label }}
-                    </span>
+                  <span class="news-tag" style="--tag-color: {{ meta.color }};">
+                    <i class="{{ meta.icon }} news-tag-icon"></i>{{ meta.label }}
+                  </span>
                 {% endif %}
                 {% endfor %}
             </div>
@@ -72,24 +72,35 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  var rows = document.querySelectorAll('.news-row');
   var more = document.querySelector('.news-show-more');
   var less = document.querySelector('.news-show-less');
-  var hidden = document.querySelectorAll('.news-hidden');
+  var pageSize = 5;
+  var visibleCount = pageSize;
+
+  function render() {
+    rows.forEach(function (row, i) {
+      row.style.display = i < visibleCount ? 'flex' : 'none';
+    });
+    if (more) more.style.display = visibleCount < rows.length ? 'inline' : 'none';
+    if (less) less.style.display = visibleCount > pageSize ? 'inline' : 'none';
+  }
+
   if (more) {
     more.addEventListener('click', function (e) {
       e.preventDefault();
-      hidden.forEach(function (el) { el.style.display = 'flex'; });
-      more.style.display = 'none';
-      less.style.display = 'inline';
+      visibleCount = Math.min(visibleCount + pageSize, rows.length);
+      render();
     });
   }
   if (less) {
     less.addEventListener('click', function (e) {
       e.preventDefault();
-      hidden.forEach(function (el) { el.style.display = 'none'; });
-      less.style.display = 'none';
-      more.style.display = 'inline';
+      visibleCount = Math.max(visibleCount - pageSize, pageSize);
+      render();
     });
   }
+
+  render();
 });
 </script>

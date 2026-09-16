@@ -6,38 +6,95 @@ author_profile: true
 ---
 
 <style>
-  .pub-list.icon-mode .pub-row { display: none; }
-  .pub-list.icon-mode .pub-card { display: block; }
+  :root { color-scheme: light; }
+  html[data-color-scheme="dark"] { color-scheme: dark; }
+
+  /* --- view mode container --- */
+  .pub-list.icon-mode {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5em;
+  }
+  .pub-list.detail-mode {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* --- show/hide the right block per item, per mode --- */
+  .pub-list.icon-mode .pub-card   { display: block; }
+  .pub-list.icon-mode .pub-row    { display: none; }
   .pub-list.detail-mode .pub-card { display: none; }
-  .pub-list.detail-mode .pub-row { display: flex; gap: 1em; padding: .4em 0; border-bottom: 1px solid #eee; }
+  .pub-list.detail-mode .pub-row  { display: flex; }
 
   .pub-card {
+    position: relative;    
     display: grid; grid-template-rows: 160px auto; gap: .5em;
     border: 1px solid #ddd; border-radius: 8px; padding: 1em;
   }
-  .pub-list.icon-mode { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5em; }
+
+  .pub-title a, .pub-title { color: inherit; text-decoration: none; font-weight: 600; }
+  .pub-title { font-size: 1rem; margin: .3rem 0 .15rem; }
+  .pub-authors { font-size: .8rem; color: #888; margin: 0 0 .15rem; }
+  .pub-meta, .pub-venue-year { font-size: .8rem; color: #888; margin: 0; }
+
+  .pub-card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .pub-links { position: relative; z-index: 2; }
+  .pub-links-compact {
+    position: relative;
+    z-index: 2;
+  }
+
+  .pub-row {
+    position: relative;   /* anchor for the overlay link */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0rem;
+    padding: 0em 0;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+  }
+
+  .pub-row:has(.pub-btn) {
+    padding-bottom: .9em;
+  }
+
+  .pub-row-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .pub-row-text { display: flex; flex-direction: column; gap: 2px; }
 
   .pub-controls {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    flex-wrap: wrap;
+    gap: 1rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;      /* fallback: scrolls instead of breaking layout if truly too narrow */
     padding: .75rem 1rem;
-    border: 1px solid #e2e2e2;
+    border: 1px solid #ddd;
     border-radius: 10px;
     margin-bottom: 1.5rem;
   }
+  
+  .pub-controls > * {
+    flex-shrink: 0;         /* toggle, switch, selects keep their natural size */
+  }
 
-  /* segmented icon/detail toggle */
   .seg-toggle {
     display: inline-flex;
-    background: #f0f0f0;
+    background: #ddd;
     border-radius: 8px;
     padding: 2px;
   }
   .seg-toggle button {
     border: none;
-    background: transparent;
+    background: inherit;
     padding: 6px 10px;
     border-radius: 6px;
     cursor: pointer;
@@ -47,7 +104,6 @@ author_profile: true
   .seg-toggle button.active { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
   .seg-toggle button.active svg { fill: #111; }
 
-  /* selected-only switch */
   .switch { display: flex; align-items: center; gap: .5rem; cursor: pointer; font-size: .9rem; }
   .switch input { display: none; }
   .switch-track {
@@ -61,9 +117,7 @@ author_profile: true
   .switch input:checked + .switch-track { background: #2f6fed; }
   .switch input:checked + .switch-track .switch-thumb { left: 18px; }
 
-  /* year range */
-  .year-range { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: #555; }
-  .year-range { position: relative; width: 160px; height: 24px; }
+  .year-range { position: relative; flex: 1 1 80px; min-width: 80px; width: auto; height: 24px; font-size: .85rem; color: inherit; }
   .year-range input[type=range] {
     position: absolute; width: 100%; top: 8px; pointer-events: none;
     -webkit-appearance: none; background: transparent;
@@ -76,18 +130,18 @@ author_profile: true
   #year-min-label { left: 0; } #year-max-label { right: 0; }
 
   .pub-controls select {
-    border: 1px solid #ddd; border-radius: 6px; padding: 5px 8px; font-size: .85rem;
+    border: 1px solid #ddd; border-radius: 6px; padding: 5px 8px; font-size: .85rem; background: inherit; color: inherit; color-scheme: light dark;
   }
 
   .pub-group-header {
-    grid-column: 1 / -1;        /* spans full width in icon-mode grid */
+    grid-column: 1 / -1;
     font-size: .8rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .04em;
     color: #888;
     padding: 1.25rem 0 .4rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #ddd;
     margin-bottom: .5rem;
   }
   .pub-group-header:first-child { padding-top: 0; }
@@ -143,29 +197,29 @@ author_profile: true
 
       <!-- ICON CARD -->
       <div class="pub-card">
-        {% if pub.image %}<img src="{{ pub.image | relative_url }}" alt="">{% endif %}
-        <h3><a href="{{ pub.permalink }}">{{ pub.title }}</a></h3>
-        <p class="pub-meta">{{ pub.venue }}, {{ pub.date | date: '%Y' }}</p>
+        {% if pub.image %}
+          <img src="{{ pub.image | relative_url }}" alt="">
+        {% else %}
+          <img src="{{ '/images/pubs/placeholder.png' | relative_url }}" alt="">
+        {% endif %}
+        <h3 class="pub-title">{{ pub.title }}</h3>
+        <p class="pub-authors">{% include pub_author_list.html authors=pub.authors %}</p>
+        <p class="pub-meta">{{ pub.venue }} {{ pub.date | date: '%Y' }}</p>
         <div class="pub-links">
-          {% if pub.links.paper %}<a href="{{ pub.links.paper }}">Paper</a>{% endif %}
-          {% if pub.links.code %}<a href="{{ pub.links.code }}">Code</a>{% endif %}
-          {% if pub.links.dataset %}<a href="{{ pub.links.dataset }}">Dataset</a>{% endif %}
-          {% if pub.links.slides %}<a href="{{ pub.links.slides }}">Slides</a>{% endif %}
-          {% if pub.links.poster %}<a href="{{ pub.links.poster }}">Poster</a>{% endif %}
-          {% if pub.links.video %}<a href="{{ pub.links.video }}">Video</a>{% endif %}
-          {% if pub.links.project %}<a href="{{ pub.links.project }}">Project</a>{% endif %}
+          {% include pub_link_buttons.html pub=pub %}
         </div>
+        <a class="pub-card-link" href="{{ pub.permalink }}" aria-label="View {{ pub.title }} details"></a>
       </div>
 
       <!-- DETAIL ROW -->
       <div class="pub-row">
-        <span class="pub-title"><a href="{{ pub.permalink }}">{{ pub.title }}</a></span>
-        <span class="pub-authors">{{ pub.authors }}</span>
-        <span class="pub-venue-year">{{ pub.venue }}, {{ pub.date | date: '%Y' }}</span>
-        <span class="pub-icons">
-          {% if pub.links.paper %}<a href="{{ pub.links.paper }}" title="Paper">📄</a>{% endif %}
-          {% if pub.links.code %}<a href="{{ pub.links.code }}" title="Code">💻</a>{% endif %}
-        </span>
+        <span class="pub-title">{{ pub.title }}</span>
+        <span class="pub-authors">{% include pub_author_list.html authors=pub.authors %}</span>
+        <span class="pub-venue-year">{{ pub.venue_full | default: pub.venue }}</span>
+        <div class="pub-links pub-links-compact">
+          {% include pub_link_buttons.html pub=pub %}
+        </div>
+        <a class="pub-row-link" href="{{ pub.permalink }}" aria-label="View {{ pub.title }} details"></a>
       </div>
     </div>
   {% endfor %}

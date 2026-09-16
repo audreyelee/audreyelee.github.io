@@ -1,0 +1,72 @@
+<style>
+  .pub-links { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+  .pub-links-compact { flex-shrink: 0; }
+
+  .pub-btn {
+    --btn-color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 5px;
+    border-radius: 5px;
+    background: color-mix(in srgb, var(--btn-color) 14%, transparent);
+    color: var(--btn-color);
+    font-size: .7rem;
+    font-weight: 400;
+    border: 1px solid color-mix(in srgb, var(--btn-color) 25%, transparent);
+    transition: background .12s, border-color .12s;
+  }
+  .archive .pub-btn {
+    text-decoration: none;
+  }
+  .archive:hover .pub-btn:hover {
+    text-decoration: none;
+  }
+  .pub-btn:hover {
+    background: color-mix(in srgb, var(--btn-color) 22%, transparent);
+    border-color: color-mix(in srgb, var(--btn-color) 40%, transparent);
+  }
+  html[data-theme="dark"] .pub-btn {
+    background: color-mix(in srgb, var(--btn-color) 22%, var(--global-code-background-color));
+    color: color-mix(in srgb, var(--btn-color) 60%, white);
+    border-color: color-mix(in srgb, var(--btn-color) 35%, var(--global-border-color));
+  }
+
+  html[data-theme="dark"] .pub-btn:hover {
+    background: color-mix(in srgb, var(--btn-color) 32%, var(--global-code-background-color));
+    border-color: color-mix(in srgb, var(--btn-color) 50%, var(--global-dark-border-color));
+  }
+  .pub-btn svg { width: 11px; height: 11px; stroke: currentColor; }
+</style>
+
+{% assign link_defs = "paper|Paper|#4b6bb0,code|Code|#57606a,dataset|Dataset|#2f855a,slides|Slides|#b7791f,poster|Poster|#97266d,video|Video|#c53030,project|Project|#276f86,talk|Talk|#6b46c1" | split: "," %}
+{% for def in link_defs %}
+  {% assign parts = def | split: "|" %}
+  {% assign key = parts[0] %}
+  {% assign label = parts[1] %}
+  {% assign color = parts[2] %}
+  {% assign url = pub.links[key] %}
+  {% if url %}
+    <a class="pub-btn" href="{{ url }}" style="--btn-color: {{ color }}" target="_blank" rel="noopener">
+      {% case key %}
+        {% when 'paper' %}
+          <svg viewBox="0 0 20 20"><path d="M4 2h9l3 3v13H4V2z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7 9h6M7 12h6M7 15h4" stroke="currentColor" stroke-width="1.2"/></svg>
+        {% when 'code' %}
+          <svg viewBox="0 0 20 20"><path d="M7 5l-5 5 5 5M13 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {% when 'dataset' %}
+          <svg viewBox="0 0 20 20"><ellipse cx="10" cy="5" rx="7" ry="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 5v10c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 10c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+        {% when 'slides' %}
+          <svg viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M7 17h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        {% when 'poster' %}
+          <svg viewBox="0 0 20 20"><rect x="3" y="2" width="14" height="16" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6h8M6 9h8M6 12h5" stroke="currentColor" stroke-width="1.2"/></svg>
+        {% when 'video' %}
+          <svg viewBox="0 0 20 20"><rect x="2" y="4" width="12" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M14 8l4-2.5v9L14 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        {% when 'project' %}
+          <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 10h15M10 2.5c2.5 2 2.5 13 0 15M10 2.5c-2.5 2-2.5 13 0 15" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        {% when 'talk' %}
+          <svg viewBox="0 0 20 20"><path d="M4 8a6 6 0 1112 0c0 4-3 5-3 7H7c0-2-3-3-3-7z" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>
+      {% endcase %}
+      <span>{{ label }}</span>
+    </a>
+  {% endif %}
+{% endfor %}

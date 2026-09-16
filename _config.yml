@@ -26,9 +26,9 @@ author:
   avatar           : "headshot.png"
   name             : "Audrey Lee"
   pronouns         : "she/her/hers"  
-  bio              : "PhD student in human-robot interaction and robot learning"
+  bio              : "PhD student @ Carnegie Mellon University"
   location         : "Pittsburgh, PA, USA"
-  employer         : "Carnegie Mellon University"
+  employer         : # 
   uri              : # URL
   email            : "ael2@andrew.cmu.edu" 
 
@@ -125,7 +125,7 @@ staticman:
       options:
         format           : "iso8601" # "iso8601" (default), "timestamp-seconds", "timestamp-milliseconds"
 atom_feed:
-  hide                   : false     # change to true to hide the RSS feed in the footer
+  hide                   : true     # change to true to hide the RSS feed in the footer
   path                   : # blank (default) uses feed.xml
 
 

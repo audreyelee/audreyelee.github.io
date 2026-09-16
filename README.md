@@ -1,6 +1,8 @@
 # Academic Pages
 **Academic Pages is a GitHub Pages template for personal and professional portfolio-oriented websites.**
 
+Start auto-updating within container using: bundle exec jekyll serve --livereload --force_polling --port 4001
+
 ![Academic Pages template example](images/themes/homepage-light.png "Academic Pages template example")
 
 # Getting Started

@@ -1,0 +1,32 @@
+<style>
+    .pub-authors .me {
+    font-weight: 700;
+    background: linear-gradient(90deg, #7b2ff7, #f107a3);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    }
+</style>
+
+{% assign my_name = site.author.name %}
+{% assign my_last = my_name | split: ' ' | last %}
+{% assign authors_arr = pub.authors | split: ', ' %}
+{% for a in authors_arr %}
+  {% assign a_trim = a | strip %}
+  {% assign prefix = '' %}
+
+  {% if a_trim contains '& ' %}
+    {% assign prefix = '& ' %}
+    {% assign a_trim = a_trim | remove_first: '& ' | strip %}
+  {% elsif a_trim contains 'and ' %}
+    {% assign prefix = 'and ' %}
+    {% assign a_trim = a_trim | remove_first: 'and ' | strip %}
+  {% endif %}
+
+  {% assign is_me = false %}
+  {% if a_trim == my_name or a_trim contains my_last %}
+    {% assign is_me = true %}
+  {% endif %}
+
+  {{ prefix }}{% if is_me %}<span class="me">{{ a_trim }}</span>{% else %}{{ a_trim }}{% endif %}{% unless forloop.last %}, {% endunless %}
+{% endfor %}
